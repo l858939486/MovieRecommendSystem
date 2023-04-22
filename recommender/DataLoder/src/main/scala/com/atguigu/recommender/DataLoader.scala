@@ -1,7 +1,9 @@
 package com.atguigu.recommender
 
+import com.mongodb.casbah.commons.MongoDBObject
+import com.mongodb.casbah.{MongoClient, MongoClientURI}
 import org.apache.spark.SparkConf
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
 /**
  *
@@ -65,6 +67,10 @@ object DataLoader {
   val ANIME_DATA_PATH = "C:\\Users\\lx\\IdeaProjects\\MovieRecommendSystem\\recommender\\DataLoder\\src\\main\\resources\\anime.csv"
   val RATING_DATA_PATH = "C:\\Users\\lx\\IdeaProjects\\MovieRecommendSystem\\recommender\\DataLoder\\src\\main\\resources\\rating.csv"
 
+  val MONGODB_ANIME_COLLECTION = "Anime"
+  val MONGODB_RATING_COLLECTION = "Rating"
+  val ES_ANIME_INDEX = "Anime"
+
   def main(args: Array[String]): Unit = {
 
     val config = Map(
@@ -104,8 +110,11 @@ object DataLoader {
 
 //    数据预处理
 
+//隐式定
+    implicit val mongoConfig = MongoConfig(config("mongo.uri"),config("mongo.db"))
+
 //    将数据保存到MongoDB
-    storeDataInMongoDB()
+    storeDataInMongoDB(animeDF,ratingDF)
 
 //    保存数据到ES
     storeDataInES()
@@ -113,7 +122,34 @@ object DataLoader {
     spark.stop()
   }
 
-  def storeDataInMongoDB(): Unit ={
+  def storeDataInMongoDB(animeDF:DataFrame,ratingDF:DataFrame)(implicit mongoConfig: MongoConfig): Unit ={
+
+    //新建一个mongodb的连接
+    val mongoClient = MongoClient(MongoClientURI(mongoConfig.uri))
+
+    //如果mongodb中已经有相应的数据库，要先进行删除
+    mongoClient(mongoConfig.db)(MONGODB_ANIME_COLLECTION).dropCollection()
+    mongoClient(mongoConfig.db)(MONGODB_RATING_COLLECTION).dropCollection()
+
+    //    将DF数据写入对应的mongodb表中
+    animeDF.write
+      .option("uri",mongoConfig.uri)
+      .option("collection",MONGODB_ANIME_COLLECTION)
+      .mode("overwirte")
+      .format("com.mongodb.spark.sql")
+      .save()
+
+    ratingDF.write
+      .option("uri", mongoConfig.uri)
+      .option("collection", MONGODB_RATING_COLLECTION)
+      .mode("overwirte")
+      .format("com.mongodb.spark.sql")
+      .save()
+
+    //对数据表建索引
+    mongoClient(mongoConfig.db)(MONGODB_ANIME_COLLECTION).createIndex(MongoDBObject("anime_id" -> 1))
+    mongoClient(mongoConfig.db)(MONGODB_RATING_COLLECTION).createIndex(MongoDBObject("user_id" -> 1))
+    mongoClient(mongoConfig.db)(MONGODB_RATING_COLLECTION).createIndex(MongoDBObject("anime_id" -> 1))
 
   }
   def storeDataInES():Unit ={
