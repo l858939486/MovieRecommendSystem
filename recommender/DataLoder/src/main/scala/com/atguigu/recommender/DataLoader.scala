@@ -64,95 +64,100 @@ case class ESConfig(httpHosts:String,
 object DataLoader {
 
 //定义常量
-  val ANIME_DATA_PATH = "C:\\Users\\lx\\IdeaProjects\\MovieRecommendSystem\\recommender\\DataLoder\\src\\main\\resources\\anime.csv"
-  val RATING_DATA_PATH = "C:\\Users\\lx\\IdeaProjects\\MovieRecommendSystem\\recommender\\DataLoder\\src\\main\\resources\\rating.csv"
+    val ANIME_DATA_PATH = "C:\\Users\\lx\\IdeaProjects\\MovieRecommendSystem\\recommender\\DataLoder\\src\\main\\resources\\anime.csv"
+    val RATING_DATA_PATH = "C:\\Users\\lx\\IdeaProjects\\MovieRecommendSystem\\recommender\\DataLoder\\src\\main\\resources\\rating.csv"
 
-  val MONGODB_ANIME_COLLECTION = "Anime"
-  val MONGODB_RATING_COLLECTION = "Rating"
-  val ES_ANIME_INDEX = "Anime"
+    val MONGODB_ANIME_COLLECTION = "Anime"
+    val MONGODB_RATING_COLLECTION = "Rating"
+    val ES_ANIME_INDEX = "Anime"
+    def main(args: Array[String]): Unit = {
 
-  def main(args: Array[String]): Unit = {
+        val config = Map(
+          "spark.cores" -> "local[*]",
+          "mongo.uri" -> "mongodb://localhost:27017/recommender",
+          "mongo.db" -> "recommender",
+          "es.httpHosts" -> "localhost:9200",
+          "es.transportHosts" -> "localhost:9300",
+          "es.index" -> "recommender",
+          "es.cluster.name" -> "elasticsearch"
+        )
 
-    val config = Map(
-      "spark.cores" -> "local[*]",
-      "mongo.uri" -> "mongodb://localhost:27017/recommender",
-      "mongo.db" -> "recommender",
-      "es.httpHosts" -> "localhost:9200",
-      "es.transportHosts" -> "localhost:9300",
-      "es.index" -> "recommender",
-      "es.cluster.name" -> "elasticsearch"
-    )
 //    创建一个SparkConf对象
-    val sparkConf = new SparkConf().setMaster(config("spark.cores")).setAppName("DataLoader")
+        val sparkConf = new
+            SparkConf().setAppName("DataLoader").setMaster(config("spark.cores"))
 
 //    创建一个SparkSession
-    val spark = SparkSession.builder().config(sparkConf).getOrCreate()
+        val spark = SparkSession.builder().config(sparkConf).getOrCreate()
 
-    import spark.implicits._
+        import spark.implicits._
 
 
 //    加载数据
-    val animeRDD = spark.sparkContext.textFile(ANIME_DATA_PATH)
+        val animeRDD = spark.sparkContext.textFile(ANIME_DATA_PATH)
 
-    val animeDF = animeRDD.map(
-      item => {
-        val attr = item.split(",")
-        Anime(attr(0).toInt,attr(1).trim,attr(2).trim,attr(3).trim,attr(4).trim,attr(5).toDouble,attr(6).trim)
-      }
-    ).toDF()
+        val animeDF = animeRDD.map(
+          item => {
+            val attr = item.split(",")
+            Anime(attr(0).toInt,attr(1).trim,attr(2).trim,attr(3).trim,attr(4).trim,attr(5).toDouble,attr(6).trim)
+          }
+        ).toDF()
 
-    val ratingRDD = spark.sparkContext.textFile(RATING_DATA_PATH)
+        val ratingRDD = spark.sparkContext.textFile(RATING_DATA_PATH)
 
-    val ratingDF = ratingRDD.map(item => {
-      val attr = item.split(",")
-      Rating(attr(0).toInt, attr(1).toInt, attr(2).toDouble)
-    }).toDF()
+        val ratingDF = ratingRDD.map(item => {
+          val attr = item.split(",")
+          Rating(attr(0).toInt, attr(1).toInt, attr(2).toDouble)
+        }).toDF()
+
 
 //    数据预处理
 
 //隐式定
-    implicit val mongoConfig = MongoConfig(config("mongo.uri"),config("mongo.db"))
+        implicit val mongoConfig = MongoConfig(config("mongo.uri"),config("mongo.db"))
 
-//    将数据保存到MongoDB
-    storeDataInMongoDB(animeDF,ratingDF)
+    //    将数据保存到MongoDB
+        storeDataInMongoDB(animeDF,ratingDF)
 
 //    保存数据到ES
-    storeDataInES()
+        storeDataInES()
 
-    spark.stop()
-  }
+        spark.stop()
+    }
 
-  def storeDataInMongoDB(animeDF:DataFrame,ratingDF:DataFrame)(implicit mongoConfig: MongoConfig): Unit ={
+    def storeDataInMongoDB(animeDF:DataFrame,ratingDF:DataFrame)(implicit mongoConfig: MongoConfig): Unit ={
 
     //新建一个mongodb的连接
-    val mongoClient = MongoClient(MongoClientURI(mongoConfig.uri))
+        val mongoClient = MongoClient(MongoClientURI(mongoConfig.uri))
 
     //如果mongodb中已经有相应的数据库，要先进行删除
-    mongoClient(mongoConfig.db)(MONGODB_ANIME_COLLECTION).dropCollection()
-    mongoClient(mongoConfig.db)(MONGODB_RATING_COLLECTION).dropCollection()
+        mongoClient(mongoConfig.db)(MONGODB_ANIME_COLLECTION).dropCollection()
+        mongoClient(mongoConfig.db)(MONGODB_RATING_COLLECTION).dropCollection()
 
     //    将DF数据写入对应的mongodb表中
-    animeDF.write
-      .option("uri",mongoConfig.uri)
-      .option("collection",MONGODB_ANIME_COLLECTION)
-      .mode("overwirte")
-      .format("com.mongodb.spark.sql")
-      .save()
+        animeDF.write
+          .option("uri",mongoConfig.uri)
+          .option("collection",MONGODB_ANIME_COLLECTION)
+          .mode("overwrite")
+          .format("com.mongodb.spark.sql")
+          .save()
 
-    ratingDF.write
-      .option("uri", mongoConfig.uri)
-      .option("collection", MONGODB_RATING_COLLECTION)
-      .mode("overwirte")
-      .format("com.mongodb.spark.sql")
-      .save()
+        ratingDF.write
+          .option("uri", mongoConfig.uri)
+          .option("collection", MONGODB_RATING_COLLECTION)
+          .mode("overwrite")
+          .format("com.mongodb.spark.sql")
+          .save()
 
     //对数据表建索引
-    mongoClient(mongoConfig.db)(MONGODB_ANIME_COLLECTION).createIndex(MongoDBObject("anime_id" -> 1))
-    mongoClient(mongoConfig.db)(MONGODB_RATING_COLLECTION).createIndex(MongoDBObject("user_id" -> 1))
-    mongoClient(mongoConfig.db)(MONGODB_RATING_COLLECTION).createIndex(MongoDBObject("anime_id" -> 1))
+        mongoClient(mongoConfig.db)(MONGODB_ANIME_COLLECTION).createIndex(MongoDBObject("anime_id" -> 1))
+        mongoClient(mongoConfig.db)(MONGODB_RATING_COLLECTION).createIndex(MongoDBObject("user_id" -> 1))
+        mongoClient(mongoConfig.db)(MONGODB_RATING_COLLECTION).createIndex(MongoDBObject("anime_id" -> 1))
 
-  }
-  def storeDataInES():Unit ={
 
-  }
+//    关闭Mongodb
+        mongoClient.close()
+    }
+    def storeDataInES():Unit ={
+
+    }
 }
