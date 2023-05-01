@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="12684edf-15dc-46ac-96e7-ae9772a4efe2" name="Changes" comment="数据加载模板3-准备先去学一下mongodb">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="12684edf-15dc-46ac-96e7-ae9772a4efe2" name="Changes" comment="数据加载模板4 - 修改了缩进">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recommender/DataLoder/src/main/resources/anime.csv" beforeDir="false" afterPath="$PROJECT_DIR$/recommender/DataLoder/src/main/resources/anime.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recommender/DataLoder/src/main/resources/rating.csv" beforeDir="false" afterPath="$PROJECT_DIR$/recommender/DataLoder/src/main/resources/rating.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/recommender/DataLoder/src/main/scala/com/atguigu/recommender/DataLoader.scala" beforeDir="false" afterPath="$PROJECT_DIR$/recommender/DataLoder/src/main/scala/com/atguigu/recommender/DataLoader.scala" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -26,9 +27,6 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-  </component>
-  <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/recommender/DataLoder/src/main/resources/anime.csv" root0="SKIP_INSPECTION" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -160,7 +158,9 @@
       <workItem from="1682937600176" duration="1057000" />
       <workItem from="1682938677720" duration="827000" />
       <workItem from="1682939617486" duration="765000" />
-      <workItem from="1682944716290" duration="2336000" />
+      <workItem from="1682944716290" duration="2746000" />
+      <workItem from="1682947490760" duration="132000" />
+      <workItem from="1682947637682" duration="5014000" />
     </task>
     <task id="LOCAL-00001" summary="数据加载模板2">
       <created>1682132337236</created>
@@ -176,7 +176,14 @@
       <option name="project" value="LOCAL" />
       <updated>1682136746524</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="数据加载模板4 - 修改了缩进">
+      <created>1682947179475</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1682947179475</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -227,7 +234,8 @@
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="数据加载模板2" />
     <MESSAGE value="数据加载模板3-准备先去学一下mongodb" />
-    <option name="LAST_COMMIT_MESSAGE" value="数据加载模板3-准备先去学一下mongodb" />
+    <MESSAGE value="数据加载模板4 - 修改了缩进" />
+    <option name="LAST_COMMIT_MESSAGE" value="数据加载模板4 - 修改了缩进" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

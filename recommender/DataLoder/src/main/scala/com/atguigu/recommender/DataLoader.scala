@@ -1,5 +1,6 @@
 package com.atguigu.recommender
 
+import com.atguigu.recommender.DataLoader.{ANIME_DATA_PATH, MONGODB_ANIME_COLLECTION, MONGODB_RATING_COLLECTION, RATING_DATA_PATH}
 import com.mongodb.casbah.commons.MongoDBObject
 import com.mongodb.casbah.{MongoClient, MongoClientURI}
 import org.apache.spark.SparkConf
@@ -16,7 +17,6 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 /**
  * 2951,                                                                                    动漫ID， anime_id
  * Gintama: Nanigoto mo Saiyo ga Kanjin nano de Tasho Senobisuru Kurai ga Choudoyoi,        动漫名称，name
- * "Action, Comedy, Historical, Mecha, Parody, Samurai, Sci-Fi, Shounen",                   标签：genre
  * Special,                                                                                 类别：type
  * 1,                                                                                       级数:episodes
  * 8.13,                                                                                    评分：rating
@@ -24,7 +24,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
  */
 case class Anime(anime_id : Int,
                  name : String,
-                 genre : String,
+//                 genre : String,
                  anime_type : String,
                  episodes : String,
                  rating :  Double,
@@ -38,6 +38,12 @@ case class Anime(anime_id : Int,
 case class Rating(user_id : Int,
                   anime_id : Int,
                   rating : Double)
+/**
+ * 32281    动漫id，anime_id
+ * Drama    类型：tag
+ */
+case class Tag(anime_id : Int,
+                tag : String)
 
 //把mongo和es的配置封装成样例类
 
@@ -66,9 +72,12 @@ object DataLoader {
 //定义常量
     val ANIME_DATA_PATH = "C:\\Users\\lx\\IdeaProjects\\MovieRecommendSystem\\recommender\\DataLoder\\src\\main\\resources\\anime.csv"
     val RATING_DATA_PATH = "C:\\Users\\lx\\IdeaProjects\\MovieRecommendSystem\\recommender\\DataLoder\\src\\main\\resources\\rating.csv"
+    val TAG_DATA_PATH = "C:\\Users\\lx\\IdeaProjects\\MovieRecommendSystem\\recommender\\DataLoder\\src\\main\\resources\\tag.csv"
 
     val MONGODB_ANIME_COLLECTION = "Anime"
     val MONGODB_RATING_COLLECTION = "Rating"
+    val MONGODB_TAG_COLLECTION = "Tag"
+
     val ES_ANIME_INDEX = "Anime"
     def main(args: Array[String]): Unit = {
 
@@ -89,16 +98,18 @@ object DataLoader {
 //    创建一个SparkSession
         val spark = SparkSession.builder().config(sparkConf).getOrCreate()
 
+        // 在对 DataFrame 和 Dataset 进行操作许多操作都需要这个包进行支持
         import spark.implicits._
 
 
-//    加载数据
+        //    加载数据
         val animeRDD = spark.sparkContext.textFile(ANIME_DATA_PATH)
+
 
         val animeDF = animeRDD.map(
           item => {
             val attr = item.split(",")
-            Anime(attr(0).toInt,attr(1).trim,attr(2).trim,attr(3).trim,attr(4).trim,attr(5).toDouble,attr(6).trim)
+            Anime(attr(0).toInt,attr(1).trim,attr(2).trim,attr(3).trim,attr(4).toDouble,attr(5).trim)
           }
         ).toDF()
 
@@ -109,22 +120,29 @@ object DataLoader {
           Rating(attr(0).toInt, attr(1).toInt, attr(2).toDouble)
         }).toDF()
 
+        val tagRDD = spark.sparkContext.textFile(TAG_DATA_PATH)
+
+        val tagDF = tagRDD.map(item => {
+            val attr = item.split(",")
+            Tag(attr(0).toInt, attr(1).trim)
+        }).toDF()
 
 //    数据预处理
 
 //隐式定
-        implicit val mongoConfig = MongoConfig(config("mongo.uri"),config("mongo.db"))
+        implicit val mongoConfig = MongoConfig(config.get("mongo.uri").get,config.get("mongo.db").get)
 
-    //    将数据保存到MongoDB
-        storeDataInMongoDB(animeDF,ratingDF)
+
+        //    将数据保存到MongoDB
+        storeDataInMongoDB(animeDF,ratingDF,tagDF)
 
 //    保存数据到ES
-        storeDataInES()
+//        storeDataInES()
 
         spark.stop()
     }
 
-    def storeDataInMongoDB(animeDF:DataFrame,ratingDF:DataFrame)(implicit mongoConfig: MongoConfig): Unit ={
+    def storeDataInMongoDB(animeDF:DataFrame,ratingDF:DataFrame,tagDF:DataFrame)(implicit mongoConfig: MongoConfig): Unit ={
 
     //新建一个mongodb的连接
         val mongoClient = MongoClient(MongoClientURI(mongoConfig.uri))
@@ -132,32 +150,44 @@ object DataLoader {
     //如果mongodb中已经有相应的数据库，要先进行删除
         mongoClient(mongoConfig.db)(MONGODB_ANIME_COLLECTION).dropCollection()
         mongoClient(mongoConfig.db)(MONGODB_RATING_COLLECTION).dropCollection()
+        mongoClient(mongoConfig.db)(MONGODB_TAG_COLLECTION).dropCollection()
 
     //    将DF数据写入对应的mongodb表中
-        animeDF.write
+        animeDF
+          .write
           .option("uri",mongoConfig.uri)
           .option("collection",MONGODB_ANIME_COLLECTION)
           .mode("overwrite")
           .format("com.mongodb.spark.sql")
           .save()
 
-        ratingDF.write
+        ratingDF
+          .write
           .option("uri", mongoConfig.uri)
           .option("collection", MONGODB_RATING_COLLECTION)
           .mode("overwrite")
           .format("com.mongodb.spark.sql")
           .save()
 
-    //对数据表建索引
+        tagDF
+          .write
+          .option("uri", mongoConfig.uri)
+          .option("collection", MONGODB_TAG_COLLECTION)
+          .mode("overwrite")
+          .format("com.mongodb.spark.sql")
+          .save()
+
+        //对数据表建索引
         mongoClient(mongoConfig.db)(MONGODB_ANIME_COLLECTION).createIndex(MongoDBObject("anime_id" -> 1))
         mongoClient(mongoConfig.db)(MONGODB_RATING_COLLECTION).createIndex(MongoDBObject("user_id" -> 1))
         mongoClient(mongoConfig.db)(MONGODB_RATING_COLLECTION).createIndex(MongoDBObject("anime_id" -> 1))
+        mongoClient(mongoConfig.db)(MONGODB_TAG_COLLECTION).createIndex(MongoDBObject("anime_id" -> 1))
 
 
 //    关闭Mongodb
         mongoClient.close()
     }
-    def storeDataInES():Unit ={
-
-    }
+//    def storeDataInES():Unit ={
+//
+//    }
 }
