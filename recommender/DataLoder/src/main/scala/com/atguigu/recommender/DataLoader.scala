@@ -5,6 +5,7 @@ import com.mongodb.casbah.commons.MongoDBObject
 import com.mongodb.casbah.{MongoClient, MongoClientURI}
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.elasticsearch.common.settings.Settings
 
 /**
  *
@@ -27,7 +28,7 @@ case class Anime(anime_id : Int,
 //                 genre : String,
                  anime_type : String,
                  episodes : String,
-                 rating :  Double,
+                 rating :  String,
                  members : String)
 
 /**
@@ -109,7 +110,7 @@ object DataLoader {
         val animeDF = animeRDD.map(
           item => {
             val attr = item.split(",")
-            Anime(attr(0).toInt,attr(1).trim,attr(2).trim,attr(3).trim,attr(4).toDouble,attr(5).trim)
+            Anime(attr(0).toInt,attr(1).trim,attr(2).trim,attr(3).trim,attr(4).trim,attr(5).trim)
           }
         ).toDF()
 
@@ -127,17 +128,33 @@ object DataLoader {
             Tag(attr(0).toInt, attr(1).trim)
         }).toDF()
 
-//    数据预处理
-
 //隐式定
         implicit val mongoConfig = MongoConfig(config.get("mongo.uri").get,config.get("mongo.db").get)
 
 
         //    将数据保存到MongoDB
         storeDataInMongoDB(animeDF,ratingDF,tagDF)
+        //    数据预处理
 
-//    保存数据到ES
-//        storeDataInES()
+        //        把Anime对应的tag信息添加进去，加一列  tag1|tag2|tag3
+        import org.apache.spark.sql.functions._
+
+        val newGenre = tagDF.groupBy($"anime_id")
+          .agg(concat_ws("|",collect_set($"tag")).as("genre"))
+          .select("anime_id","genre")
+
+//        对newGenre和anime做join，数据合并在一起
+        val animeWithGenreDF = animeDF.join(newGenre,Seq("anime_id"),"left")
+
+        implicit val esConfig = ESConfig(config.get("es.httpHosts"),
+            config.get("es.transportHosts"),
+            config.get("es.index"),
+            config.get("es.cluster.name"))
+
+
+
+        //    保存数据到ES
+        storeDataInES(animeWithGenreDF)
 
         spark.stop()
     }
@@ -187,7 +204,10 @@ object DataLoader {
 //    关闭Mongodb
         mongoClient.close()
     }
-//    def storeDataInES():Unit ={
-//
-//    }
+    def storeDataInES(animeDF:DataFrame)(implicit eSConfig: ESConfig):Unit ={
+//     新建es配置
+        val settings:Settings = Settings.builder().put("cluster.name",eSConfig.clustername).build()
+
+//       新建一个es客户端
+    }
 }
