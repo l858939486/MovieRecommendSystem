@@ -33,7 +33,6 @@ case class Recommendation(anime_id:Int,
                           score:Double)
 
 //定义动漫类别推荐统计，top10推荐对象
-//类别：Historical   Action  Drama  Mystery  Ecchi    School    Adventure  Hentai  Fantasy  Game
 case class GenresRecommendation( genre:String,
                                  recs:Seq[Recommendation])
 
@@ -93,14 +92,16 @@ object StatisticsRecommender {
           .load()
           .as[Anime]
           .toDF()
-
-
-
+//本来觉得-1对rating影响太大，算出来都是10分的，我无语了还是加上-1吧
+//        val ratingNotHavingZeroDF = ratingDF.filter("rating != -1")
         //创建一张名叫 ratings 的表
         ratingDF.createOrReplaceTempView("ratings")
+
         //TODO: 不同的统计推荐结果
 
         //        1.历史热门统计：历史评分数据最多  anime_id count
+
+
         val rateMoreAnimeDF = spark.sql("select anime_id,count(anime_id) as count from ratings group by anime_id")
         //        把结果写入对应的mongodb表中，
         storeDFInMongoDB(rateMoreAnimeDF, RATE_MORE_ANIME)
@@ -126,9 +127,9 @@ object StatisticsRecommender {
 //          .save()
 
         //        3.电影平均得分：统计电影的平均评分  anime_id   avg
-        val averageAnimeDF = spark.sql("select anime_id , avg(rating) as avg from ratings group by anime_id rating = -1")
+        val averageAnimeDF = spark.sql("select anime_id , avg(rating) as avg from ratings group by anime_id")
 //        val averageAnimeDF = spark.sql("select anime_id , avg(rating) as avg from ratings group by anime_id EXCEPT rating = -1")
-
+        //
         storeDFInMongoDB(averageAnimeDF,AVERAGE_ANIME)
 
         //        4.类别动漫top统计，各个类别统计top10的高评分

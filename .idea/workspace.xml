@@ -4,12 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="12684edf-15dc-46ac-96e7-ae9772a4efe2" name="Changes" comment="数据加载模板8 - 使用animewithgenreDF加载数据库">
-      <change afterPath="$PROJECT_DIR$/recommender/StatisticsRecommender/src/main/resources/log4j.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/recommender/StatisticsRecommender/src/main/scala/com/atguigu/statistics/StatisticsRecommender.scala" afterDir="false" />
+    <list default="true" id="12684edf-15dc-46ac-96e7-ae9772a4efe2" name="Changes" comment="离线推荐统计推荐1 -三个统计推荐">
+      <change afterPath="$PROJECT_DIR$/recommender/OfflineRecommender/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recommender/OfflineRecommender/src/main/java/com/atguigu/Main.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recommender/OfflineRecommender/src/main/scala/com/atguigu/offline/OfflineRecommender.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recommender/StatisticsRecommender/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/recommender/StatisticsRecommender/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recommender/StatisticsRecommender/src/main/java/com/atguigu/Main.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recommender/StatisticsRecommender/src/main/scala/com/atguigu/statistics/StatisticsRecommender.scala" beforeDir="false" afterPath="$PROJECT_DIR$/recommender/StatisticsRecommender/src/main/scala/com/atguigu/statistics/StatisticsRecommender.scala" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,10 +72,10 @@
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Global Libraries&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.scala.compiler.ScalaCompileServerForm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.projectsettings.compiler.annotationProcessors&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -83,7 +85,7 @@
       <recent name="C:\Users\lx\IdeaProjects\MovieRecommendSystem\recommender\DataLoder\src\main\resources" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.StatisticsRecommender">
+  <component name="RunManager" selected="Application.OfflineRecommender">
     <configuration name="DataLoader" type="Application" factoryName="Application" temporary="true">
       <option name="ALTERNATIVE_JRE_PATH" value="1.8" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
@@ -95,6 +97,19 @@
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="com.atguigu.recommender.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="OfflineRecommender" type="Application" factoryName="Application" temporary="true">
+      <option name="MAIN_CLASS_NAME" value="com.atguigu.offline.OfflineRecommender" />
+      <module name="OfflineRecommender" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.atguigu.offline.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -130,12 +145,14 @@
       </method>
     </configuration>
     <list>
+      <item itemvalue="Application.OfflineRecommender" />
       <item itemvalue="Application.StatisticsRecommender" />
       <item itemvalue="Application.DataLoader" />
       <item itemvalue="Scala REPL.Scala REPL" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.OfflineRecommender" />
         <item itemvalue="Application.StatisticsRecommender" />
         <item itemvalue="Application.DataLoader" />
         <item itemvalue="Scala REPL.Scala REPL" />
@@ -182,7 +199,12 @@
       <workItem from="1682995639223" duration="887000" />
       <workItem from="1683084463128" duration="2289000" />
       <workItem from="1683086783601" duration="15416000" />
-      <workItem from="1683105651492" duration="3152000" />
+      <workItem from="1683105651492" duration="5365000" />
+      <workItem from="1683111043984" duration="3356000" />
+      <workItem from="1683114419197" duration="1997000" />
+      <workItem from="1683117871434" duration="1234000" />
+      <workItem from="1683119446963" duration="811000" />
+      <workItem from="1683120281120" duration="2676000" />
     </task>
     <task id="LOCAL-00001" summary="数据加载模板2">
       <created>1682132337236</created>
@@ -233,7 +255,14 @@
       <option name="project" value="LOCAL" />
       <updated>1683097141960</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="离线推荐统计推荐1 -三个统计推荐">
+      <created>1683109053356</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1683109053356</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -289,7 +318,8 @@
     <MESSAGE value="数据加载模板6 - 将tag和anime合并（又变回去了，用|分割）" />
     <MESSAGE value="数据加载模板7 - 连接了es" />
     <MESSAGE value="数据加载模板8 - 使用animewithgenreDF加载数据库" />
-    <option name="LAST_COMMIT_MESSAGE" value="数据加载模板8 - 使用animewithgenreDF加载数据库" />
+    <MESSAGE value="离线推荐统计推荐1 -三个统计推荐" />
+    <option name="LAST_COMMIT_MESSAGE" value="离线推荐统计推荐1 -三个统计推荐" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -298,11 +328,6 @@
           <properties class="org.apache.spark.SparkException" package="org.apache.spark" />
           <option name="timeStamp" value="1" />
         </breakpoint>
-        <line-breakpoint enabled="true" type="scala-line">
-          <url>file://$PROJECT_DIR$/recommender/StatisticsRecommender/src/main/scala/com/atguigu/statistics/StatisticsRecommender.scala</url>
-          <line>133</line>
-          <option name="timeStamp" value="12" />
-        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
