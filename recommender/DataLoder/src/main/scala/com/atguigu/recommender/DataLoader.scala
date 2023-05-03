@@ -87,6 +87,7 @@ object DataLoader {
     val MONGODB_TAG_COLLECTION = "Tag"
 
     val ES_ANIME_INDEX = "Anime"
+
     def main(args: Array[String]): Unit = {
 
         val config = Map(
@@ -139,8 +140,7 @@ object DataLoader {
         implicit val mongoConfig = MongoConfig(config.get("mongo.uri").get,config.get("mongo.db").get)
 
 
-        //    将数据保存到MongoDB
-        storeDataInMongoDB(animeDF,ratingDF,tagDF)
+
         //    数据预处理
 
         //        把Anime对应的tag信息添加进去，加一列  tag1|tag2|tag3
@@ -157,6 +157,9 @@ object DataLoader {
 //            config.get("es.transportHosts"),
 //            config.get("es.index"),
 //            config.get("es.cluster.name"))
+        //    将数据保存到MongoDB
+        storeDataInMongoDB(animeWithGenreDF, ratingDF, tagDF)
+
         implicit val esConfig = ESConfig(config.get("es.httpHosts").get,
             config.get("es.transportHosts").get,
             config.get("es.index").get,
@@ -222,7 +225,7 @@ object DataLoader {
 //       新建一个es客户端
         val esClient = new PreBuiltTransportClient(settings)
 
-        //需要将 TransportHosts 添加到 esClient 中
+        //需要将 TransportHosts 添加到 esClient                                                                                                             中
         val REGEX_HOST_PORT = "(.+):(\\d+)".r
 
         eSConfig.transportHosts.split(",").foreach {
