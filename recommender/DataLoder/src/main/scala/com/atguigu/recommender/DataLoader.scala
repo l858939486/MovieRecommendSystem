@@ -5,7 +5,14 @@ import com.mongodb.casbah.commons.MongoDBObject
 import com.mongodb.casbah.{MongoClient, MongoClientURI}
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequest
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest
 import org.elasticsearch.common.settings.Settings
+import org.elasticsearch.common.transport.InetSocketTransportAddress
+import org.elasticsearch.transport.client.PreBuiltTransportClient
+
+import java.net.InetAddress
 
 /**
  *
@@ -146,10 +153,14 @@ object DataLoader {
 //        对newGenre和anime做join，数据合并在一起
         val animeWithGenreDF = animeDF.join(newGenre,Seq("anime_id"),"left")
 
-        implicit val esConfig = ESConfig(config.get("es.httpHosts"),
-            config.get("es.transportHosts"),
-            config.get("es.index"),
-            config.get("es.cluster.name"))
+//        implicit val esConfig = ESConfig(config.get("es.httpHosts"),
+//            config.get("es.transportHosts"),
+//            config.get("es.index"),
+//            config.get("es.cluster.name"))
+        implicit val esConfig = ESConfig(config.get("es.httpHosts").get,
+            config.get("es.transportHosts").get,
+            config.get("es.index").get,
+            config.get("es.cluster.name").get)
 
 
 
@@ -209,5 +220,33 @@ object DataLoader {
         val settings:Settings = Settings.builder().put("cluster.name",eSConfig.clustername).build()
 
 //       新建一个es客户端
+        val esClient = new PreBuiltTransportClient(settings)
+
+        //需要将 TransportHosts 添加到 esClient 中
+        val REGEX_HOST_PORT = "(.+):(\\d+)".r
+
+        eSConfig.transportHosts.split(",").foreach {
+            case REGEX_HOST_PORT(host: String, port: String) => {
+                esClient.addTransportAddress(new
+                    InetSocketTransportAddress(InetAddress.getByName(host), port.toInt))
+            }
+        }
+
+        //需要清除掉 ES 中遗留的数据
+        if (esClient.admin().indices().exists(new
+            IndicesExistsRequest(eSConfig.index)).actionGet().isExists) {
+            esClient.admin().indices().delete(new DeleteIndexRequest(eSConfig.index))
+        }
+        esClient.admin().indices().create(new CreateIndexRequest(eSConfig.index))
+
+        //将数据写入到 ES 中
+        animeDF
+          .write
+          .option("es.nodes", eSConfig.httpHosts)
+          .option("es.http.timeout", "100m")
+          .option("es.mapping.id", "anime_id")
+          .mode("overwrite")
+          .format("org.elasticsearch.spark.sql")
+          .save(eSConfig.index + "/" + ES_ANIME_INDEX)
     }
 }

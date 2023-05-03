@@ -4,10 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="12684edf-15dc-46ac-96e7-ae9772a4efe2" name="Changes" comment="数据加载模板5 - 增加了tag数据集">
-      <change afterPath="$PROJECT_DIR$/recommender/DataLoder/src/main/resources/tag.csv" afterDir="false" />
+    <list default="true" id="12684edf-15dc-46ac-96e7-ae9772a4efe2" name="Changes" comment="数据加载模板6 - 将tag和anime合并（又变回去了，用|分割）">
+      <change afterPath="$PROJECT_DIR$/recommender/StatisticsRecommender/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recommender/StatisticsRecommender/src/main/java/com/atguigu/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recommender/DataLoder/src/main/resources/rating.csv" beforeDir="false" afterPath="$PROJECT_DIR$/recommender/DataLoder/src/main/resources/rating.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/recommender/DataLoder/src/main/scala/com/atguigu/recommender/DataLoader.scala" beforeDir="false" afterPath="$PROJECT_DIR$/recommender/DataLoder/src/main/scala/com/atguigu/recommender/DataLoader.scala" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -56,26 +57,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;jdk.selected.JAVA_MODULE&quot;: &quot;openjdk-19&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/lx/IdeaProjects/MovieRecommendSystem/recommender/DataLoder/src/main/resources&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.scala.compiler.ScalaCompileServerForm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "jdk.selected.JAVA_MODULE": "1.8",
+    "last_opened_file_path": "C:/Users/lx/IdeaProjects/MovieRecommendSystem/recommender/DataLoder/src/main/resources",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "org.jetbrains.plugins.scala.compiler.ScalaCompileServerForm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\lx\IdeaProjects\MovieRecommendSystem\recommender\DataLoder\src\main\resources" />
@@ -162,7 +163,9 @@
       <workItem from="1682947490760" duration="132000" />
       <workItem from="1682947637682" duration="6214000" />
       <workItem from="1682994071326" duration="405000" />
-      <workItem from="1682995639223" duration="312000" />
+      <workItem from="1682995639223" duration="887000" />
+      <workItem from="1683084463128" duration="2289000" />
+      <workItem from="1683086783601" duration="1945000" />
     </task>
     <task id="LOCAL-00001" summary="数据加载模板2">
       <created>1682132337236</created>
@@ -192,7 +195,14 @@
       <option name="project" value="LOCAL" />
       <updated>1682955876077</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="数据加载模板6 - 将tag和anime合并（又变回去了，用|分割）">
+      <created>1682996488306</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1682996488306</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -245,7 +255,8 @@
     <MESSAGE value="数据加载模板3-准备先去学一下mongodb" />
     <MESSAGE value="数据加载模板4 - 修改了缩进" />
     <MESSAGE value="数据加载模板5 - 增加了tag数据集" />
-    <option name="LAST_COMMIT_MESSAGE" value="数据加载模板5 - 增加了tag数据集" />
+    <MESSAGE value="数据加载模板6 - 将tag和anime合并（又变回去了，用|分割）" />
+    <option name="LAST_COMMIT_MESSAGE" value="数据加载模板6 - 将tag和anime合并（又变回去了，用|分割）" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
