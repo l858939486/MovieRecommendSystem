@@ -42,10 +42,12 @@ case class Anime(anime_id : Int,
  * 1,     用户id，user_id
  * 226,   动漫id，anime_id
  * -1     该用户对该动漫的评分：rating
+ * 1213123   时间戳   timestmp
  */
 case class Rating(user_id : Int,
                   anime_id : Int,
-                  rating : Double)
+                  rating : Double,
+                  timestmp: Int)
 /**
  * 32281    动漫id，anime_id
  * Drama    类型：tag
@@ -126,7 +128,7 @@ object DataLoader {
 
         val ratingDF = ratingRDD.map(item => {
           val attr = item.split(",")
-          Rating(attr(0).toInt, attr(1).toInt, attr(2).toDouble)
+          Rating(attr(0).toInt, attr(1).toInt, attr(2).toDouble,attr(3).toInt)
         }).toDF()
 
         val tagRDD = spark.sparkContext.textFile(TAG_DATA_PATH)
