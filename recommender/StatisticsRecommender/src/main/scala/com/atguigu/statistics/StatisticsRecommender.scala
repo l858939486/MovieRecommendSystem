@@ -4,6 +4,7 @@ import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import java.text.SimpleDateFormat
+import java.util.Date
 
 /**
  *
@@ -20,7 +21,8 @@ case class Anime(anime_id : Int,
 
 case class Rating(user_id : Int,
                   anime_id : Int,
-                  rating : Double)
+                  rating : Double,
+                  timestmp : Int)
 
 case class Tag(anime_id : Int,
                tag : String)
@@ -48,7 +50,7 @@ object StatisticsRecommender {
     //    历史评分次数最多
     val RATE_MORE_ANIME = "RateMoreAnime"
     //    最近热门电影统计
-    //    val RATE_MORE_RECENTLY_ANIME = "RateMoreRecentlyAnime"
+    val RATE_MORE_RECENTLY_ANIME = "RateMoreRecentlyAnime"
     //    电影平均得分统计
     val AVERAGE_ANIME = "AverageAnime"
     //    每个类别优质电影统计
@@ -71,8 +73,6 @@ object StatisticsRecommender {
         implicit val mongoConfig = MongoConfig(config.get("mongo.uri").get,config.get("mongo.db").get)
         //加入隐式转换
         import spark.implicits._
-
-
 
         //数据加载进来
         val ratingDF = spark
@@ -106,25 +106,27 @@ object StatisticsRecommender {
         //        把结果写入对应的mongodb表中，
         storeDFInMongoDB(rateMoreAnimeDF, RATE_MORE_ANIME)
 
-//        //        2.近期热门统计，按照时间戳“yyyyMM”格式选取最近的评分数据，统计评分个数
-//        //统计以月为单位拟每个电影的评分数
-//        //数据结构 -》 anime_id,count,time
-//        //创建一个日期格式化工具
-//        val simpleDateFormat = new SimpleDateFormat("yyyyMM")
-//        //注册一个 UDF 函数，用于将 timestamp 装换成年月格式 1260759144000 => 201605
-//        spark.udf.register("changeDate", (x: Int) => simpleDateFormat.format(new Date(x *
-//          1000L)).toInt)
-//        // 将原来的 Rating 数据集中的时间转换成年月的格式
-//        val ratingOfYearMonth = spark.sql("select anime_id, score, changeDate(timestamp) as yearmonth from ratings")
-//          // 将新的数据集注册成为一张表 ratingOfYearMonth.createOrReplaceTempView("ratingOfMonth")
-//        val rateMoreRecentlyAnime = spark.sql("select anime_id, count(anime_id) as count ,yearmonth from ratingOfMonth group by yearmonth, anime_id")
-//          rateMoreRecentlyAnime
-//          .write
-//          .option("uri", mongoConfig.uri)
-//          .option("collection", RATE_MORE_RECENTLY_ANIME)
-//          .mode("overwrite")
-//          .format("com.mongodb.spark.sql")
-//          .save()
+        //        2.近期热门统计，按照时间戳“yyyyMM”格式选取最近的评分数据，统计评分个数
+        //统计以月为单位拟每个电影的评分数
+        //数据结构 -》 anime_id,count,time
+        //创建一个日期格式化工具
+        val simpleDateFormat = new SimpleDateFormat("yyyyMM")
+        //注册一个 UDF 函数，用于将 timestmp 装换成年月格式 1260759144000 => 201605
+        spark.udf.register("changeDate", (x: Int) => simpleDateFormat.format(new Date(x * 1000L)).toInt)
+        // 将原来的 Rating 数据集中的时间转换成年月的格式
+        val ratingOfYearMonth = spark.sql("select anime_id, rating, changeDate(timestmp) as yearmonth from ratings")
+
+          // 将新的数据集注册成为一张表
+        ratingOfYearMonth.createOrReplaceTempView("ratingOfMonth")
+
+        val rateMoreRecentlyAnime = spark.sql("select anime_id, count(anime_id) as count ,yearmonth from ratingOfMonth group by yearmonth, anime_id")
+          rateMoreRecentlyAnime
+          .write
+          .option("uri", mongoConfig.uri)
+          .option("collection", RATE_MORE_RECENTLY_ANIME)
+          .mode("overwrite")
+          .format("com.mongodb.spark.sql")
+          .save()
 
         //        3.电影平均得分：统计电影的平均评分  anime_id   avg
         val averageAnimeDF = spark.sql("select anime_id , avg(rating) as avg from ratings group by anime_id")
